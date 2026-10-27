@@ -1,0 +1,27 @@
+name: Offline regression tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test offline logic and regression contracts
+        run: npm test
+      - name: Validate PowerShell installer syntax
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem scripts -Filter *.ps1
+          foreach ($file in $files) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($file.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -ne 0) { throw "PowerShell syntax invalid: $($file.Name)" }
+          }
+          Write-Host 'PowerShell script syntax checks passed.'
