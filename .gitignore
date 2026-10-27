@@ -1,0 +1,23 @@
+# Local account details and runtime state: never commit
+config.local.json
+.env
+.env.*
+!.env.example
+**/auth.json
+**/.codex/**
+**/logs/**
+logs/
+*.log
+*.tmp
+*.pid
+*.lock
+*.bak
+*.backup
+*.old
+*.xml
+*修复前备份*
+.DS_Store
+Thumbs.db
+node_modules/
+node-path.txt
+*.code-workspace

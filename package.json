@@ -1,0 +1,14 @@
+{
+  "name": "codex-quota-prewarm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Windows multi-account Codex 5-hour usage-window scheduler",
+  "scripts": {
+    "test": "node tests/test-window-detection.js && node tests/test-morning-regression.js",
+    "dry-run": "node src/morning-real-prewarm.js --dry-run",
+    "dry-run-poll": "node src/smart-scheduler.js --dry-run"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
