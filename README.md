@@ -115,6 +115,10 @@ config.example.json
 
 不得上传 `auth.json`、refresh token、API Key、`logs/`、`config.local.json`、`node-path.txt`。仓库内的 `.gitignore` 已配置常见排除项，但仍应在提交前人工检查 `git diff --cached`。参见 <https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository>。
 
+## 多账号动态管理
+
+现在支持 A 固定主账号、B/C/D 等可替换的登录槽位，换号后会清除旧账户的历史额度状态，避免重复登录同一个账号。详见 [多账号槽位与账号更换](docs/MULTI_ACCOUNT.md)。
+
 ## 已知限制
 
 - 额度接口及其内部字段可能随官方 Codex CLI 更新而变化，无法承诺所有版本都兼容。

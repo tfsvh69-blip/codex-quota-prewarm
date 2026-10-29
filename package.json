@@ -4,7 +4,7 @@
   "private": true,
   "description": "Windows multi-account Codex 5-hour usage-window scheduler",
   "scripts": {
-    "test": "node tests/test-window-detection.js && node tests/test-morning-regression.js && node tests/test-regression-contracts.js",
+    "test": "node tests/test-window-detection.js && node tests/test-morning-regression.js && node tests/test-regression-contracts.js && node tests/test-account-manager.js",
     "dry-run": "node src/morning-real-prewarm.js --dry-run",
     "dry-run-poll": "node src/smart-scheduler.js --dry-run"
   },

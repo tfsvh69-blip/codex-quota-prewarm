@@ -26,6 +26,18 @@ OpenAI 的五小时窗口在上一窗口结束后，由**下一条真实 Work/Co
 | 14 | 整理桌面后担心计划任务路径失效 | 计划任务 Action 引用原运行目录的绝对路径 | 保留旧运行路径，在独立文件夹另做 Git 源码副本 | 检查 Action 绝对路径仍存在 |
 | 15 | 公开仓库可能泄露凭据 | 工作目录混有 `auth.json`、日志、账号状态、个人路径和历史备份 | 逐项暂存源码；`.gitignore`、敏感信息扫描 | `git diff --cached` / `git ls-files` 无私有文件 |
 
+### 16. C 账号登录脚本误用 PowerShell 只读变量 `$HOME`（2026-10-29）
+
+**现象：** 双击 C 登录批处理时，`login-slot.ps1` 报错“无法覆盖变量 HOME，因为该变量为只读变量或常量”，浏览器登录未开始。
+
+**根因：** PowerShell 变量名大小写不敏感，局部变量 `$home` 与系统自动变量 `$HOME` 冲突；仓库的 `scripts/login.ps1` 和一份旧登录脚本也存在此问题。
+
+**修复：** 将三份脚本涉及的 `$home` 全部重命名为 `$slotHome`，新增 `-ValidateOnly` 非交互预检查，并加入防回归测试防止再次引入 `$home`、`$host` 或 `$pid` 命名冲突。
+
+**验收：** C 槽位预检查输出 `PREFLIGHT_OK`，独立登录目录正确；不启动浏览器、不读取或覆盖其他账号凭据。完成真实浏览器授权后，再通过额度查询与真实请求验收 C。
+
+Microsoft 参考：[PowerShell 自动变量](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_automatic_variables)、[变量大小写规则](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_case-sensitivity)。
+
 ## 二、两个最关键的误判
 
 ### A. 「当前时间 + 五小时」并不总是活跃窗口

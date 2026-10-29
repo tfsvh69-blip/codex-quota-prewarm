@@ -1,5 +1,6 @@
 'use strict';
 const fs=require('fs'),path=require('path'),os=require('os');
+const {loadAccounts}=require('./account-manager');
 const root=path.resolve(__dirname,'..');
 const local=path.join(root,'config.local.json');
 let config={};try{config=JSON.parse(fs.readFileSync(local,'utf8'))}catch{}
@@ -17,12 +18,6 @@ function possibleCodex(){
   return candidates;
 }
 const exe=possibleCodex().find(p=>{try{return fs.statSync(p).isFile()}catch{return false}})||'codex.exe';
-function accounts(){
- const arr=(Array.isArray(config.accounts)&&config.accounts.length?config.accounts:[
-  {name:'A',home:path.join(os.homedir(),'.codex')},
-  {name:'B',home:path.join(os.homedir(),'.codex-prewarm-B')}
- ]);
- return arr.map(a=>({name:String(a.name),home:path.resolve(String(a.home).replace(/^~(?=[/\\])/,os.homedir()))}));
-}
+function accounts(){return loadAccounts(root,'config.local.json');}
 const tz=config.timeZone||Intl.DateTimeFormat().resolvedOptions().timeZone||'Asia/Shanghai';
 module.exports={root,logs,work,exe,accounts,tz};

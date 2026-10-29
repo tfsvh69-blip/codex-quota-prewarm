@@ -5,6 +5,7 @@
 const fs=require('fs'),path=require('path'),os=require('os');
 const {spawn}=require('child_process');
 const runtime=require('./runtime');
+const {bindIdentity,validateDistinct}=require('./account-manager');
 const root=runtime.root, logDir=runtime.logs;
 fs.mkdirSync(logDir,{recursive:true});
 const work=runtime.work;
@@ -12,7 +13,7 @@ fs.mkdirSync(work,{recursive:true});
 const exe=runtime.exe;
 const argv=process.argv.slice(2);
 const dry=argv.includes('--dry-run'), accountArg=argv.find(x=>x.startsWith('--account='))?.split('=')[1];
-const accts=runtime.accounts().filter(a=>!accountArg||a.name===accountArg);
+const accts=validateDistinct(runtime.accounts().filter(a=>!accountArg||a.name===accountArg));
 const minutes=n=>n*60000, now=()=>Date.now();
 const date=()=>new Date().toLocaleDateString('sv-SE',{timeZone:runtime.tz});
 const stamp=()=>new Date().toLocaleString('sv-SE',{timeZone:'Asia/Shanghai',hour12:false});
@@ -105,9 +106,15 @@ function model(home){
 }
 async function one(a){
  const day=date(),st=readState(a.name);
- const s=st.day===day?st:{day:day,status:'new',attempts:0};
+ if(a.identity.status!=='ok'){
+   log(a.name+' PENDING_LOGIN: '+a.identity.status+'; no model request');return false;
+ }
+ const b=bindIdentity(st,a.identity,message=>log(a.name+' '+message));
+ let s=b.state;
+ if(b.changed || s.day!==day)s={day:day,status:'new',attempts:0,identityHash:a.identity.hash};
+ saveState(a.name,s);
  const auth=path.join(a.home,'auth.json');
- if(!fs.existsSync(auth)){log(a.name+' FAIL no_login_file');return false}
+ if(!fs.existsSync(auth)){log(a.name+' PENDING_LOGIN: no_login_file');return false}
  if(s.status==='verified'){
    log(a.name+' SKIP confirmed for '+day+' fixed reset='+s.resetAt);
    return true;
@@ -172,10 +179,10 @@ async function main(){
   log('RUN day='+date()+' mode='+(dry?'dry':'real')+' accounts='+accts.map(x=>x.name).join(','));
   let all=true;
   for(const a of accts){
-   try{const ok=await one(a);if(!ok)all=false}
+   try{const ok=await one(a);if(!ok && a.identity.status==='ok')all=false}
    catch(e){all=false;log(a.name+' ERROR '+e.name)}
   }
-  log('DONE allVerified='+all);
+  log('DONE allLoggedInVerified='+all+' pendingLogin='+accts.filter(a=>a.identity.status!=='ok').map(a=>a.name).join(','));
   if(!all&&!dry)process.exitCode=2;
  }finally{if(fd!==null){try{fs.closeSync(fd)}catch{};try{fs.unlinkSync(lock)}catch{}}}
 }

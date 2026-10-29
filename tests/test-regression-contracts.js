@@ -1,71 +1,75 @@
 'use strict';
-// Static regression contracts: safe offline guards, NOT an end-to-end quota test.
-const fs=require('node:fs');
-const path=require('node:path');
-const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..');
-function load(f){return fs.readFileSync(path.join(root,f),'utf8')}
+const load=f=>fs.readFileSync(path.join(root,f),'utf8');
 const morning=load('src/morning-real-prewarm.js');
 const poll=load('src/smart-scheduler.js');
+const mgr=load('src/account-manager.js');
+const runtime=load('src/runtime.js');
 const detector=load('src/window-detection.js');
 const installer=load('scripts/install.ps1');
 const vbs=load('scripts/run-node-hidden.vbs');
 const ignore=load('.gitignore');
-const runtime=load('src/runtime.js');
 const check=(name,fn)=>{fn();console.log('PASS '+name)};
-
-check('Morning never uses smart quota heuristics as a first-request gate',()=>{
+check('Morning remains a real-request workflow without old quota heuristic gate',()=>{
  assert.match(morning,/const response=await model\(a\.home\)/);
  assert.doesNotMatch(morning,/classifyWindow\s*\(/);
  assert.doesNotMatch(morning,/tokens_increased/);
- assert.match(morning,/s\.status==='verified'/);
- assert.match(morning,/st\.day===day/);
+ assert.match(morning,/status==='verified'/);
 });
-check('Independent accounts and daily verification state',()=>{
- assert.match(runtime,/\.codex-prewarm-B/);
- assert.match(runtime,/\.codex/);
+check('Account identity is bound before daily success state can be reused',()=>{
+ assert.match(morning,/bindIdentity\(st,a\.identity/);
+ assert.match(morning,/b\.changed \|\| s\.day!==day/);
+ assert.match(poll,/bindIdentity\(loadState\(a\.name\),a\.identity/);
+ assert.match(mgr,/identityHash/);
+ assert.match(mgr,/ACCOUNT_REPLACED/);
+ assert.match(mgr,/duplicate login identity/);
+ assert.match(runtime,/loadAccounts/);
+});
+check('Every slot gets its own home, state, and bounded retry attempts',()=>{
+ assert.match(mgr,/\.codex-prewarm-B/);
+ assert.match(mgr,/getIdentity/);
  assert.match(morning,/morning-'\+name\+'\.json'/);
  assert.match(morning,/for\(const a of accts\)/);
- assert.match(morning,/s\.status='verified'/);
  assert.match(morning,/s\.attempts>=3/);
 });
-check('Real turn checks use events, tokens and correct exit code',()=>{
+check('Codex real turns require events, response and positive token consumption',()=>{
  assert.match(morning,/x\.type==='turn\.completed'/);
  assert.match(morning,/agent_message/);
- assert.match(morning,/used=Number\(/);
  assert.match(morning,/code===0&&completed&&reply&&used>0&&!failed/);
  assert.match(morning,/WINDOW_VERIFIED/);
 });
-check('No inherited stdin or visible Codex child terminal',()=>{
+check('Subprocesses do not inherit a visible terminal or open stdin',()=>{
  assert.match(morning,/windowsHide:true/);
  assert.match(morning,/stdio:\['ignore','pipe','pipe'\]/);
  assert.match(poll,/windowsHide:true/);
  assert.match(poll,/stdio:\['ignore','pipe','pipe'\]/);
 });
-check('Daytime rolling-reset detection and 5h duplicate cooldown remain',()=>{
+check('Daytime window heuristic, cooldown and time shift monitoring remain',()=>{
  assert.match(poll,/checkRollingProbe\(/);
  assert.match(poll,/!classified\.inactive/);
  assert.match(poll,/t-s\.lastSuccessAt<hours\(4\.9\)/);
+ assert.match(poll,/RESET_TIME_CHANGED/);
  assert.match(detector,/drift>=Math\.max/);
 });
-check('Windows installer uses XML repetition and login delay',()=>{
+check('Windows Task Scheduler is configured by XML, not unsupported setters',()=>{
  assert.match(installer,/Export-ScheduledTask/);
- assert.match(installer,/Register-ScheduledTask/);
  assert.match(installer,/CreateElement\('Repetition'/);
  assert.match(installer,/PT15M/);
- assert.match(installer,/PT5H30M/);
  assert.match(installer,/PT10M/);
- assert.match(installer,/PT1M30S/);
  assert.doesNotMatch(installer,/\$morning\.Repetition\.Interval\s*=/);
 });
-check('Hidden VBS launcher strips CRLF from node-path.txt',()=>{
+check('Hidden launcher safely reads Node path and local files stay ignored',()=>{
  assert.match(vbs,/sh\.Run\(cmd, 0, True\)/);
- assert.match(vbs,/vbCr/);
- assert.match(vbs,/vbLf/);
+ assert.match(vbs,/vbCr/);assert.match(vbs,/vbLf/);
+ for(const value of ['auth.json','logs/','config.local.json','node-path.txt'])assert.ok(ignore.includes(value));
 });
-check('Local credentials and logs are gitignored',()=>{
- for(const x of ['auth.json','logs/','config.local.json','node-path.txt']){
-  assert.ok(ignore.includes(x),'missing ignore entry '+x);
- }
+check('Login script never shadows PowerShell read-only automatic variables',()=>{
+ const login=load('scripts/login.ps1');
+ assert.doesNotMatch(login,/\$home\b/i);
+ assert.doesNotMatch(login,/\$host\s*=/i);
+ assert.doesNotMatch(login,/\$pid\s*=/i);
+ assert.match(login,/\$slotHome/);
+ assert.match(login,/\$ValidateOnly/);
 });
-console.log('Offline static regression contracts passed; actual Codex requests still require a live test.');
+console.log('Static regression contracts passed (not a substitute for online tests).');

@@ -7,6 +7,7 @@ const os = require('os');
 const {spawn} = require('child_process');
 const {classifyWindow,checkRollingProbe} = require('./window-detection');
 const runtime = require('./runtime');
+const {bindIdentity,validateDistinct}=require('./account-manager');
 const root = runtime.root;
 const logs = runtime.logs;
 fs.mkdirSync(logs, {recursive:true});
@@ -16,7 +17,7 @@ const exe = runtime.exe;
 const args = process.argv.slice(2);
 const mode = args.includes('--morning') ? 'morning' : 'poll';
 const dry = args.includes('--dry-run');
-const accounts = runtime.accounts().filter(a=>!args.some(x=>x.startsWith('--account=')) || args.includes('--account='+a.name));
+const accounts = validateDistinct(runtime.accounts().filter(a=>!args.some(x=>x.startsWith('--account=')) || args.includes('--account='+a.name)));
 const minutes = n => n*60*1000;
 const hours = n => n*60*minutes(1);
 const now = () => Date.now();
@@ -137,7 +138,12 @@ function modelRequest(home) {
   });
 }
 async function one(a) {
-  const s=loadState(a.name);
+  if(a.identity.status!=='ok'){
+    log(a.name+' PENDING_LOGIN: '+a.identity.status+'; no model request');return;
+  }
+  const binding=bindIdentity(loadState(a.name),a.identity);
+  const s=binding.state;
+  if(binding.changed)saveState(a.name,s);
   // Use the separately verified morning request as a cooldown anchor,
   // so the daytime smart poll cannot spend a duplicate turn.
   try {
@@ -159,6 +165,10 @@ async function one(a) {
   const latestSession=recentlyActiveSession(a.home);
   const recentSessions=latestSession>0&&(t-latestSession<hours(5))&&(latestSession<t+minutes(2));
   const prev=s.lastSnapshot||{};
+  if(prev.resetAt && Math.abs(Number(r.resetsAt)-Number(prev.resetAt))>120){
+    log(a.name+' RESET_TIME_CHANGED previous='+stamp(Number(prev.resetAt)*1000)+
+      ' current='+stamp(until)+' used='+r.usedPercent+'% cause=unverified');
+  }
   if (Number(r.usedPercent)>0 && until>t-30*1000) {
     s.lastConfirmedActiveResetAt=until;
   }
