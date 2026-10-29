@@ -1,15 +1,15 @@
-# 多账号槽位与账号更换（A / B / C / D / ...）
+# 多账号槽位与账号更换（默认 A / B / C，可新增 D 等）
 
 ## 核心原则
 
 - **槽位不等于账号身份。** A/B/C 是本地配置名，实际 ChatGPT 账号由每个槽位的 `CODEX_HOME` 登录状态决定。
-- A 为主账号；B/C/D 可独立登录与更换。不同槽位的登录凭据不能复制或共享。
+- A 为主账号；B、C 为默认副账号，D 等须按需新增。不同槽位的登录凭据不能复制或共享。
 - 使用 SHA-256 派生的账号身份摘要检测更换。仅在本机保存摘要，不打印原始账号 ID、邮箱、Token。
-- B/C/D 换号后，旧的五小时状态、成功去重和相关活动快照应失效；防止新账号继承旧账号的“今天已预热”状态。
+- B/C（及后续新增槽位）换号后，旧的五小时状态、成功去重和相关活动快照应失效；防止新账号继承旧账号的“今天已预热”状态。
 - 同一个真实账号意外登录到两个槽位时，自动跳过重复身份的第二个槽位，防止重复调用。
 - 未登录槽位单独标记 `PENDING_LOGIN`，不会影响已登录槽位的真实请求。
 
-## 在 Windows 上添加 C 或 D
+## 在 Windows 上使用 A/B/C，或新增 D
 
 先将仓库根目录的 `config.example.json` 复制成 Git 忽略的 `config.local.json`，并在 `accounts` 中补充槽位。比如：
 
@@ -19,8 +19,7 @@
   "accounts": [
     {"name": "A", "home": ".codex", "enabled": true},
     {"name": "B", "home": ".codex-prewarm-B", "enabled": true},
-    {"name": "C", "home": ".codex-prewarm-C", "enabled": true},
-    {"name": "D", "home": ".codex-prewarm-D", "enabled": false}
+    {"name": "C", "home": ".codex-prewarm-C", "enabled": true}
   ]
 }
 ```
@@ -39,7 +38,7 @@ B 更换到另一个 ChatGPT 账号：
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\login.ps1 -Account B -Replace
 ```
 
-`-Replace` 只登出所选副账号槽位，不会登出 A。A 不能通过该参数更换。开启 D 时，把 `enabled` 改为 `true`，用 `-Account D` 登录即可。E、F 也遵循同样模式。
+`-Replace` 只登出所选副账号槽位，不会登出 A。A 不能通过该参数更换。默认配置不包含 D；若要新增 D，在本地 `config.local.json` 的 `accounts` 数组新增启用项（或通过管理台新增槽位），再用 `-Account D` 登录。E、F 也遵循同样模式。
 
 **浏览器授权需要用户本人完成。** 不要把 `auth.json`、邮箱、会话令牌或 API Key 写进 Git 仓库。
 

@@ -1,6 +1,6 @@
 # 新电脑部署 / 升级前检查清单
 
-适用范围：Windows 10/11 + 官方 Codex CLI + ChatGPT 账号 A/B。跨电脑部署时**按顺序执行**，不要直接把旧电脑的 `auth.json`、日志或本地状态文件复制过去。
+适用范围：Windows 10/11 + 官方 Codex CLI + ChatGPT 账号 A/B/C。跨电脑部署时**按顺序执行**，不要直接把旧电脑的 `auth.json`、日志或本地状态文件复制过去。
 
 ## 多账号切换时的额外检查
 
@@ -16,10 +16,10 @@
 - [ ] 确认运行时实际找到 Codex CLI：`node -e "const r=require('./src/runtime');console.log(r.exe)"`。输出应指向存在的可执行文件。
 - [ ] 代理/联网可用。**浏览器能打开网页不等于后台 CLI 能连通**；若使用 PAC 或自动代理脚本，需要额外配置兼容方式。
 
-## 2. 双账号安全与隔离
+## 2. 三账号安全与隔离
 
-- [ ] 通过 `scripts/login.ps1 -Account A`、`-Account B` 分别浏览器授权；每个账号检查 `codex login status`。
-- [ ] 核对 A、B 确实是两套不同的账号登录目录（默认 `%USERPROFILE%\.codex`、`%USERPROFILE%\.codex-prewarm-B`）。
+- [ ] 通过 `scripts/login.ps1 -Account A`、`-Account B`、`-Account C` 分别浏览器授权；每个账号检查 `codex login status`。
+- [ ] 核对 A/B/C 分别使用不同的登录目录（默认 `%USERPROFILE%\.codex`、`%USERPROFILE%\.codex-prewarm-B`、`%USERPROFILE%\.codex-prewarm-C`）。
 - [ ] **不要**提交/分享 `auth.json`、refresh token、API Key、账号 ID/邮箱等隐私信息。
 - [ ] 不使用 `OPENAI_API_KEY` 代替 ChatGPT 登录，以免误用单独计费 API。
 - [ ] 不要让新旧两套计划任务同时运行；先检查 `taskschd.msc` 中是否已有同类任务。
@@ -58,10 +58,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
 - [ ] A 有 `REQUEST_OK`，并记录 `turn.completed`、回复 `OK`、Token。
 - [ ] B 有自己独立的 `REQUEST_OK`；不能将 A 的成功算作 B 的成功。
+- [ ] C 有自己独立的 `REQUEST_OK` 和后续重置时间核验；不能用 A/B 的成功或 C 的 `--dry-run` 代替。
 - [ ] 对照请求前窗口是否已到期。请求后仅出现 `REQUEST_OK`，**不等于**开启新五小时窗口。
 - [ ] 若旧窗口已结束，额度的 `resetsAt` 在多次只读查询中保持固定，而不是每次变成“现在+五小时”。
 - [ ] 任务重复运行时，已完成账号应跳过，不能每轮都再次发出请求。
-- [ ] 第二天 05:30（首次真实无人值守）检查 `logs/晨间真实预激活.log` 和两个账号的状态；真正的跨夜稳定性只有通过这次检查才能确认。
+- [ ] 第二天 05:30（首次真实无人值守）检查 `logs/晨间真实预激活.log` 和 A/B/C 三个账号的状态；真正的跨夜稳定性只有通过这次检查才能确认。
 
 ## 6. 看到异常时按日志定位
 

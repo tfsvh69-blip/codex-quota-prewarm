@@ -14,7 +14,7 @@ function entries(){
  if(fs.existsSync(slotFile))return JSON.parse(fs.readFileSync(slotFile,'utf8'));
  const other=path.join(root,'config.local.json');
  if(fs.existsSync(other)){const o=JSON.parse(fs.readFileSync(other,'utf8'));if(Array.isArray(o.accounts))return o}
- return {version:1,accounts:['A','B','C','D'].map(name=>({name,home:name==='A'?'.codex':'.codex-prewarm-'+name,enabled:name!=='D'}))};
+ return {version:1,accounts:['A','B','C'].map(name=>({name,home:name==='A'?'.codex':'.codex-prewarm-'+name,enabled:true}))};
 }
 function writeEntries(o){
  if(!Array.isArray(o.accounts))throw Error('配置格式错误');
@@ -59,7 +59,18 @@ class Rpc {
  fail(e){this.closed=true;for(const x of this.wait.values()){clearTimeout(x.timer);x.reject(e)}this.wait.clear()}
  close(){this.closed=true;try{this.p.kill()}catch{}}
 }
-function quota(o){return o?{used:Number.isFinite(Number(o.usedPercent))?Number(o.usedPercent):null,reset:Number(o.resetsAt)||null,duration:Number(o.windowDurationMins)||null}:null}
+function quota(o){
+ if(!o)return null;
+ const raw=o.usedPercent,used=raw===null||raw===undefined||raw===''?null:Number(raw);
+ return {used:used!==null&&Number.isFinite(used)?Math.max(0,Math.min(100,used)):null,reset:Number(o.resetsAt)||null,duration:Number(o.windowDurationMins)||null};
+}
+function pickQuotaWindows(limits){
+ const windows=[limits?.primary,limits?.secondary].filter(Boolean),mins=w=>Number(w?.windowDurationMins)||0;
+ // On some plans, primary itself is weekly and there is no 5-hour window.
+ const short=windows.find(w=>mins(w)>0&&mins(w)<10080)||(limits?.primary&&!mins(limits.primary)?limits.primary:null);
+ const weekly=windows.find(w=>mins(w)===10080)||(limits?.secondary&&!mins(limits.secondary)?limits.secondary:null);
+ return {short:quota(short),weekly:quota(weekly)};
+}
 function evidence(slot,id){
  const read=f=>{try{return JSON.parse(fs.readFileSync(f,'utf8'))}catch{return {}}};
  const morning=read(path.join(schedulerRoot,'logs','morning-'+slot.name+'.json'));
@@ -81,8 +92,9 @@ async function inspect(slot){
   let rate={},error=null;
   if(account?.type==='chatgpt'){try{rate=await rpc.call('account/rateLimits/read',{})}catch{error='额度查询暂不可用'}}
   const x=rate.rateLimitsByLimitId?.codex||rate.rateLimits||{};
+  const windows=pickQuotaWindows(x);
   return {...base,email:account?.email||null,plan:account?.planType||null,
-   fiveHour:quota(x.primary),week:quota(x.secondary),allowed:rate.ordinaryUsageAllowed??null,error};
+   fiveHour:windows.short,week:windows.weekly,allowed:rate.ordinaryUsageAllowed??null,error};
  }catch(e){return {...base,error:e.message}}finally{rpc.close()}
 }
 async function getStatus(force){
@@ -188,4 +200,4 @@ const server=http.createServer(async(req,res)=>{
 });
 server.on('error',e=>{console.error('DASHBOARD_ERROR '+e.message);process.exitCode=1});
 if(require.main===module)server.listen(port,'127.0.0.1',()=>console.log('DASHBOARD_READY http://127.0.0.1:'+port));
-module.exports={server,entries,slots};
+module.exports={server,entries,slots,pickQuotaWindows};

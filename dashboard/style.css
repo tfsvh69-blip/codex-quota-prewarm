@@ -56,9 +56,9 @@ button:disabled{cursor:not-allowed;opacity:.46}
 .section-top p{margin:0;color:var(--muted);font-size:12.5px}.section-top p strong{color:#4e6077}
 .section-aside{color:#9ba6b2;font-size:11.5px}
 .account-panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
-.account-columns,.account-row{display:grid;grid-template-columns:minmax(200px,1.23fr) minmax(154px,.95fr) minmax(154px,.95fr) minmax(183px,1fr);column-gap:18px;align-items:center}
+.account-columns,.account-row{display:grid;grid-template-columns:minmax(215px,1.24fr) minmax(195px,1fr) minmax(195px,1fr) minmax(120px,.6fr);column-gap:16px;align-items:center}
 .account-columns{font-size:11px;font-weight:650;color:#8996a8;background:#fafbfd;padding:11px 20px;border-bottom:1px solid var(--line)}
-.account-row{padding:18px 20px;border-bottom:1px solid #e9edf2;transition:background .14s}
+.account-row{padding:16px 20px;border-bottom:1px solid #e9edf2;transition:background .14s}
 .account-row:last-child{border-bottom:0}
 .account-row.is-selected{background:#fbfdff;box-shadow:inset 3px 0 0 var(--accent)}
 .account-row.is-disabled{background:#fbfcfd}
@@ -70,6 +70,8 @@ button:disabled{cursor:not-allowed;opacity:.46}
 .identity-name{font-size:15px;font-weight:700;white-space:nowrap}
 .identity-status{margin-left:auto}
 .account-email{font-size:12px;color:#77879a;margin:5px 0 0 48px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.availability-note{margin:7px 0 0 48px;font-size:11.5px;color:#8f631d;font-weight:650;line-height:1.5}
+.availability-note time{font-variant-numeric:tabular-nums;white-space:nowrap}
 .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;background:#f2f4f6;color:#647589;font-size:11px;white-space:nowrap;font-weight:600}
 .pill i{width:5px;height:5px;border-radius:50%;background:currentColor}
 .pill.good{color:#27766a;background:#e5f5f0}
@@ -77,18 +79,33 @@ button:disabled{cursor:not-allowed;opacity:.46}
 .pill.danger{color:var(--danger);background:var(--danger-soft)}
 .pill.neutral{color:#71839b;background:#eef2f6}
 .quota-cell{min-width:0}
-.quota-top{display:flex;justify-content:space-between;align-items:baseline;gap:7px;font-size:11px;color:#8895a5;margin-bottom:7px}
-.quota-top strong{font-size:17px;font-weight:750;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--ink)}
-.quota-top strong.unknown{font-size:13px;color:#a2adba;font-weight:500}
-.meter{height:6px;background:#e9eff3;border-radius:4px;overflow:hidden}
-.meter-fill{height:100%;background:#4e96b0;border-radius:4px;transition:width .25s ease}
-.meter-fill.mid{background:#d69c55}.meter-fill.high{background:#ca756b}
-.meter.is-unknown{background:repeating-linear-gradient(90deg,#ecf0f4 0 7px,#f8fafb 7px 11px)}
-.quota-reset{font-size:11.5px;color:#8290a1;margin-top:6px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.quota-reset strong{font-weight:500;color:#718094}
-.row-tools{display:flex;align-items:flex-start;justify-content:flex-end;flex-wrap:wrap;gap:6px}
-.row-tools .button{min-height:32px;padding:5px 9px;font-size:11.5px}
-.row-tools .primary-action{width:100%;border-color:#d8e5e9;color:#376e69}
+.quota-top{display:flex;align-items:baseline;justify-content:space-between;gap:7px;margin-bottom:7px;color:#687b90;font-size:12px}
+.quota-remaining{color:#61788a;font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.quota-remaining.is-empty{color:#b45b4c}
+.countdown-panel{display:flex;flex-direction:column;justify-content:center;min-height:77px;padding:11px 13px;border-radius:10px;background:#f1f6f9;border:1px solid #e0e9f0}
+.countdown-caption{font-size:11px;color:#6c8496;line-height:1.3;margin-bottom:5px}
+.countdown-value{display:block;color:#245974;font-size:clamp(18px,1.9vw,24px);font-weight:750;letter-spacing:.1px;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.25}
+.countdown-panel.is-exhausted{background:#fff7eb;border-color:#f2dfc7}
+.countdown-panel.is-exhausted .countdown-caption{color:#9b6e34}
+.countdown-panel.is-exhausted .countdown-value{color:#a26624}
+.countdown-panel.is-due{background:#eef4f8;border-color:#d8e4ed}
+.countdown-panel.is-due .countdown-value{color:#506d84;font-size:15px;white-space:normal}
+.countdown-panel.is-unknown{background:#f7f9fb;border:1px dashed #e1e7ee}
+.countdown-unavailable{color:#98a6b6;font-size:14px}
+.quota-reset-foot{margin-top:7px;font-size:10.5px;color:#8090a1;line-height:1.4;font-variant-numeric:tabular-nums}
+.row-tools{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:8px;min-width:0}
+.row-tools .button{min-height:34px;padding:6px 9px;font-size:12px}
+.row-tools .primary-action{width:100%;border-color:#cfdee6;color:#306d76}
+.current-account-mark{display:grid;place-items:center;min-height:34px;background:#e8f4f0;border:1px solid #d4e9e2;border-radius:8px;color:#287468;font-size:12px;font-weight:700}
+.account-actions{position:relative;min-width:0}
+.account-actions summary{display:flex;justify-content:center;align-items:center;gap:6px;min-height:30px;border-radius:7px;color:#64788a;font-size:11.5px;cursor:pointer;list-style:none}
+.account-actions summary:hover{background:#f1f5f8;color:#2b536e}
+.account-actions summary::-webkit-details-marker{display:none}
+.account-actions summary::after{content:"⌄";font-size:13px}
+.account-actions[open] summary::after{content:"⌃"}
+.account-actions-menu{display:flex;flex-direction:column;gap:5px;margin-top:4px;padding:8px;background:#f6f9fb;border:1px solid #e2eaf0;border-radius:9px}
+.account-actions-menu .button{width:100%;white-space:normal;min-height:30px;font-size:11px}
+.account-actions-menu .button-text-danger{color:#a4524a}
 .account-detail{grid-column:1/-1;margin-top:11px}
 .account-detail summary{display:inline-flex;cursor:pointer;align-items:center;gap:6px;color:#6e8397;font-size:11.5px;list-style:none}
 .account-detail summary::-webkit-details-marker{display:none}
@@ -125,8 +142,10 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:12px;bo
  .shell{padding:0 20px}
  .account-columns{display:none}
  .account-row{grid-template-columns:minmax(165px,1.2fr) minmax(130px,1fr) minmax(130px,1fr);row-gap:10px}
- .row-tools{grid-column:1/-1;justify-content:flex-start;padding-left:48px}
- .row-tools .primary-action{width:auto}
+ .row-tools{grid-column:1/-1;flex-direction:row;align-items:center;justify-content:flex-start;padding-left:48px;gap:8px}
+ .row-tools .primary-action,.row-tools .current-account-mark{width:auto;min-width:125px;padding:6px 12px}
+ .account-actions{width:140px}
+ .account-actions-menu{position:relative;z-index:2}
  .account-detail{margin-top:0}
  .current-tip{display:none}
 }
@@ -140,9 +159,12 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:12px;bo
  .current-strip{padding:10px}.current-copy{flex-wrap:wrap;gap:4px 9px}.current-copy small{flex-basis:100%}
  .account-row{padding:15px 13px;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:15px}
  .account-identity{grid-column:1/-1}.account-email{margin-top:3px}
- .quota-cell{padding-top:7px}.quota-top strong{font-size:16px}
- .quota-reset{font-size:10px}
- .row-tools{padding-left:0;gap:5px}
+ .quota-cell{padding-top:7px}
+ .countdown-panel{min-height:75px;padding:10px}
+ .countdown-value{font-size:clamp(16px,4.5vw,21px)}
+ .quota-reset-foot{overflow-wrap:anywhere}
+ .row-tools{padding-left:0;gap:6px;align-items:stretch}
+ .account-actions{width:100%}
  .account-detail{grid-column:1/-1}.detail-body{grid-template-columns:1fr}
  .secondary{grid-template-columns:1fr}
  .simple-panel{padding:18px}

@@ -4,6 +4,13 @@
 
 > 非 OpenAI 官方项目。预激活**不会增加额度、绕过限额或强制重置正在进行的五小时窗口**；只是让上一窗口结束后下一次真实请求尽早发生。每次请求会使用正常的 Codex 额度。
 
+## 2026-10-29 · A/B/C 三账号发布版
+
+- **默认启用 A、B、C 三个账号**，每个账号独立登录与额度验证；不再默认创建停用的 D 槽位。
+- **[三账号计划任务核查、部署步骤与首次验收说明](docs/RELEASE-2026-10-29.md)**。本机的老任务虽仍名为“Codex-双账号-0530预激活”，实际按现役 `accounts.json` 逐个处理 A/B/C。
+- **[安全源码 ZIP](releases/codex-quota-prewarm-2026-10-29.zip)**：不含认证文件、本地配置和运行日志；重新安装时需分别登录三个账号。可使用 `scripts/package-release.ps1` 重新打包已提交版本。
+- **实际验证边界**：2026-10-29 A/B 晨间真实请求已验证，C 的当日模拟检查通过；C 在 2026-10-30 05:30 的首次真实无人值守结果尚待验证，不能声称每天必定成功。
+
 ## 历史故障与避免重犯（建议安装前先读）
 
 这个项目曾经过多轮 Windows 实机调试。最严重的故障是：**05:30 的 Windows 任务显示成功，但脚本因为误判累计 Token 增长而没有真正发送模型请求**；此外还遇到浮动重置时间、代理、黑框闪现、stdin 等待、双账号混淆和新电脑安装兼容问题。
@@ -17,7 +24,7 @@
 
 ## 账号管理上位机（本地网页 MVP）
 
-现在提供一个本机可运行的账户管理页面：查看各账号登录邮箱、五小时/每周额度与重置时间，新增或停用副账号，在页面里发起浏览器授权，切换当前操作槽位，以及打开对应账号的独立 Codex 终端。
+现在提供本机账号管理页面：按最早可用时间排列 A/B/C，显示五小时/每周额度的**实时重置倒计时**（剩余比例作为辅助说明）。主要按钮只保留“设为当前”，其他操作收起到“更多操作”；支持浏览器授权、账号新增/停用和打开独立 Codex 终端。
 
 - 访问地址：http://127.0.0.1:38671/
 - 手动启动：npm run dashboard
@@ -29,7 +36,7 @@
 
 ## 功能
 
-- **多账号隔离**：A/B 默认使用不同的 `CODEX_HOME`，不会通过覆盖默认账号登录文件来切换。
+- **多账号隔离**：默认启用 A/B/C 三个独立的 `CODEX_HOME`；不覆盖其它账号凭据，不会通过账号切换增加额度。
 - **晨间预激活**：每天本地时间 05:30 发起真实请求；失败时每 15 分钟补试，直到约 11:00（每账号每天最多 3 次真实尝试）。
 - **智能巡检**：08:00–23:00 每 10 分钟只读检查；旧窗口结束且近期有使用活动时才尝试新请求。
 - **额度验证**：需要实际 `turn.completed`、回复 `OK`、输入 Token 和固定的下一次重置时间。
@@ -46,7 +53,7 @@ npm install -g @openai/codex
 codex --version
 ```
 
-请确保两套 ChatGPT 账号均有可用 Codex 权限。此项目 **不需要 API Key**，也不使用单独计费的 API。脚本会在子进程中清除 `OPENAI_API_KEY`。
+请确保 A/B/C 三个 ChatGPT 账号分别具有可用 Codex 权限。此项目 **不需要 API Key**，也不使用单独计费的 API。脚本会在子进程中清除 `OPENAI_API_KEY`。
 
 ## 安装（Windows PowerShell）
 
@@ -54,9 +61,10 @@ codex --version
 git clone https://github.com/tfsvh69-blip/codex-quota-prewarm.git
 cd codex-quota-prewarm
 
-# 第一次使用：分别完成 A 和 B 的浏览器 ChatGPT 登录
+# 第一次使用：分别完成 A / B / C 的浏览器 ChatGPT 登录
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\login.ps1 -Account A
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\login.ps1 -Account B
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\login.ps1 -Account C
 
 # 先不消耗额度，做模拟检查
 node .\src\morning-real-prewarm.js --dry-run
@@ -95,7 +103,7 @@ Windows 任务的“返回码 0”只能表明任务程序退出成功，不意�
 
 ## 自定义
 
-默认 A 使用 `%USERPROFILE%\.codex`，B 使用 `%USERPROFILE%\.codex-prewarm-B`。如需其他目录或 Codex CLI 路径，可复制 `config.example.json` 为 `config.local.json` 后根据实际情况修改。**本地配置不会上传到 GitHub**。也可以通过 `CODEX_BIN` 环境变量指定官方 `codex.exe` 路径。
+默认 A 使用 `%USERPROFILE%\.codex`，B 使用 `%USERPROFILE%\.codex-prewarm-B`，C 使用 `%USERPROFILE%\.codex-prewarm-C`。如需其他目录或 Codex CLI 路径，可复制 `config.example.json` 为 `config.local.json` 后根据实际情况修改。**本地配置不会上传到 GitHub**。也可以通过 `CODEX_BIN` 环境变量指定官方 `codex.exe` 路径。
 
 建议在设置完 `config.local.json` 后验证 `node -e "console.log(require('./src/runtime').exe)"` 的输出指向存在的可执行文件。
 
@@ -109,7 +117,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\uninstall.ps1
 
 ## 项目结构
 
-```src/
+```text
+src/
   morning-real-prewarm.js    # 每天首次真实请求、按天去重和验证
   smart-scheduler.js         # 活动感知的额度窗口巡检
   window-detection.js        # 判断浮动重置时间（启发式算法）
@@ -129,14 +138,14 @@ config.example.json
 
 ## 多账号动态管理
 
-现在支持 A 固定主账号、B/C/D 等可替换的登录槽位，换号后会清除旧账户的历史额度状态，避免重复登录同一个账号。详见 [多账号槽位与账号更换](docs/MULTI_ACCOUNT.md)。
+当前默认有 A（固定主账号）、B、C 三个独立槽位；D 不再默认出现。需要第四个账号时可通过上位机新增 D 等槽位，换号会重置对应账号的历史额度状态，避免同一账号重复登录。详见 [多账号槽位与账号更换](docs/MULTI_ACCOUNT.md)。
 
 ## 已知限制
 
 - 额度接口及其内部字段可能随官方 Codex CLI 更新而变化，无法承诺所有版本都兼容。
 - “浮动重置时间”的识别来自实机观察，不是 OpenAI 官方保证的 API 语义。
 - 如果每周额度或五小时额度确实耗尽、请求被限制，脚本无法绕过。
-- 当前主要在 Windows 11 + 双 ChatGPT 登录环境验证；尚未完成全新电脑的端到端安装测试。
+- 已在 Windows 11 验证 A/B 的真实晨间请求，C 已完成模拟检查；三账号首次跨夜无人值守验证须检查 2026-10-30 的记录。尚未完成全新电脑的端到端安装测试。
 - 不提供自动注册、购买额度，也不接触其他账户的登录凭据。
 
 欢迎提交 issue、复现记录和改进建议（请先移除日志中的个人信息）。

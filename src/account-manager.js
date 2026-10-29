@@ -5,8 +5,7 @@ function loadAccounts(root, fileName='accounts.json'){
  const defaults=[
   {name:'A',home:'.codex',enabled:true,locked:true},
   {name:'B',home:'.codex-prewarm-B',enabled:true},
-  {name:'C',home:'.codex-prewarm-C',enabled:true},
-  {name:'D',home:'.codex-prewarm-D',enabled:false}
+  {name:'C',home:'.codex-prewarm-C',enabled:true}
  ];
  let slots=defaults;
  if(fs.existsSync(cfg)){

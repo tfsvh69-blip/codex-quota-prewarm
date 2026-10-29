@@ -16,11 +16,6 @@
       "name": "C",
       "home": ".codex-prewarm-C",
       "enabled": true
-    },
-    {
-      "name": "D",
-      "home": ".codex-prewarm-D",
-      "enabled": false
     }
   ]
 }

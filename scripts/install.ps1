@@ -61,4 +61,4 @@ Register-PrewarmTask 'Codex-Prewarm-Morning' 'src\morning-real-prewarm.js' $morn
 Register-PrewarmTask 'Codex-Prewarm-SmartPoll' 'src\smart-scheduler.js' $poll '' 'PT10M' 'PT15H' ''
 Register-PrewarmTask 'Codex-Prewarm-OnLogin' 'src\smart-scheduler.js' $login '--logon-recovery' '' '' 'PT1M30S'
 Write-Output ('Log files: '+(Join-Path $root 'logs'))
-Write-Output 'Complete separate ChatGPT A/B logins before unattended use.'
+Write-Output 'Complete separate ChatGPT A/B/C logins before unattended use.'
