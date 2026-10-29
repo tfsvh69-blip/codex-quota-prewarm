@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>Codex 账号管理台</title>
+ <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+ <div class="wrap">
+  <header class="top">
+   <div><div class="eyebrow">CODEX · LOCAL CONTROL</div><h1>账号与额度管理</h1><p class="sub">本机多账号管理 · 额度只读检查 · 定时预激活状态</p></div>
+   <div class="topright"><span id="conn" class="status">连接中…</span><button id="refresh" class="primary">刷新全部状态</button></div>
+  </header>
+  <div class="notice"><strong>当前操作账号：</strong><span id="selected">—</span><span class="sep">·</span>切换此处不会修改 A 主账号登录文件，也不会切换已打开的 Codex 桌面应用；点击「打开终端」才会以选定账号启动独立 Codex 会话。</div>
+  <section class="overview" id="overview"><div class="ghost">正在读取账号…</div></section>
+  <section class="section-heading"><div><h2>账号列表</h2><p>五小时/每周百分比表示已使用额度，数据来自 Codex 账号接口。</p></div><small id="checked"></small></section>
+  <div id="cards" class="cards"><div class="ghost">读取中，请稍候…</div></div>
+  <section class="bottom">
+   <div class="panel">
+    <h2>账号管理</h2><p>新增后每个槽位都有独立登录目录。停用仅停止调度，不删除登录文件。</p>
+    <div class="add"><input id="new-slot" maxlength="16" placeholder="例如 D、E、F" aria-label="新槽位名称"><button id="add-btn" class="primary">新增 / 启用槽位</button></div>
+    <div id="operation" class="operation" hidden>
+     <h3 id="op-title">登录</h3>
+     <p id="op-detail"></p>
+     <a id="auth-link" class="authlink" href="#" target="_blank" rel="noopener noreferrer">打开 ChatGPT 浏览器授权页面</a>
+     <button id="cancel-login" class="quiet">取消登录</button>
+     <small>提示：浏览器若自动使用错误账号，可复制这次的授权链接到无痕窗口选择其他账号。授权网址不需要发给任何人。</small>
+    </div>
+    <div class="tip">主账号 A 不允许停用；其他槽位登录或换号后，调度器会根据新身份重新绑定状态。</div>
+   </div>
+   <div class="panel">
+    <h2>运行说明</h2><p>现役定时任务继续独立运行，本页面只管理配置并读取它们的结果。</p>
+    <div class="info"><b>05:30</b><span>晨间真实请求和失败补试</span></div>
+    <div class="info"><b>10 分钟</b><span>白天智能巡检</span></div>
+    <div class="info"><b>本地访问</b><span>127.0.0.1，未经局域网开放</span></div>
+    <div class="info"><b>判定标准</b><span>REQUEST_OK + 窗口固定重置时间</span></div>
+    <div class="tip">REQUEST_OK 代表模型调用成功；若当时仍在旧窗口中，不能说明开启了新窗口。0% 也可能是小额度请求被取整。</div>
+   </div>
+  </section>
+  <footer><span>Codex Quota Prewarm Dashboard · MVP</span><span id="server-mode"></span></footer>
+ </div>
+ <div id="toast" class="toast" role="status"></div>
+ <script src="/app.js" defer></script>
+</body>
+</html>

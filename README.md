@@ -15,6 +15,17 @@
 
 这些检查不能替代一次真实请求和下一次无人值守执行验证。
 
+## 账号管理上位机（本地网页 MVP）
+
+现在提供一个本机可运行的账户管理页面：查看各账号登录邮箱、五小时/每周额度与重置时间，新增或停用副账号，在页面里发起浏览器授权，切换当前操作槽位，以及打开对应账号的独立 Codex 终端。
+
+- 访问地址：http://127.0.0.1:38671/
+- 手动启动：npm run dashboard
+- 安装登录后自动启动：powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\install-dashboard.ps1
+- 说明及限制：[dashboard/README.md](dashboard/README.md)
+
+上位机只监听本机回环地址，不能直接远程使用；**选择上位机当前操作账号，不会切换已经打开的 Codex 桌面应用或 VS Code 扩展**。原来的定时预激活任务保持独立运行。
+
 ## 功能
 
 - **多账号隔离**：A/B 默认使用不同的 `CODEX_HOME`，不会通过覆盖默认账号登录文件来切换。

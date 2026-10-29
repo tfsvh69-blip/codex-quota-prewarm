@@ -21,3 +21,8 @@ Thumbs.db
 node_modules/
 node-path.txt
 *.code-workspace
+
+# Local dashboard settings/state (never publish personal paths or preferences)
+.dashboard.local.json
+dashboard-state.json
+dashboard/probe-login.js
