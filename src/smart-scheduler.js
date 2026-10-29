@@ -149,7 +149,7 @@ async function one(a) {
   try {
     const m=JSON.parse(fs.readFileSync(path.join(logs,'morning-'+a.name+'.json'),'utf8'));
     const today=new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Shanghai'});
-    if(m.day===today && (m.status==='verified'||m.status==='model_completed_unverified') &&
+    if(m.day===today && m.identityHash===a.identity.hash && (m.status==='verified'||m.status==='model_completed_unverified') &&
        Number.isFinite(m.modelCompletedAt)) {
       s.lastSuccessAt=Math.max(Number(s.lastSuccessAt||0),m.modelCompletedAt);
     }

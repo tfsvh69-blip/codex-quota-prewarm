@@ -19,7 +19,8 @@ check('Morning remains a real-request workflow without old quota heuristic gate'
 });
 check('Account identity is bound before daily success state can be reused',()=>{
  assert.match(morning,/bindIdentity\(st,a\.identity/);
- assert.match(morning,/b\.changed \|\| s\.day!==day/);
+ assert.match(morning,/st\.identityHash!==a\.identity\.hash/);
+ assert.match(poll,/m\.identityHash===a\.identity\.hash/);
  assert.match(poll,/bindIdentity\(loadState\(a\.name\),a\.identity/);
  assert.match(mgr,/identityHash/);
  assert.match(mgr,/ACCOUNT_REPLACED/);

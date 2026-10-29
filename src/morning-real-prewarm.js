@@ -111,7 +111,7 @@ async function one(a){
  }
  const b=bindIdentity(st,a.identity,message=>log(a.name+' '+message));
  let s=b.state;
- if(b.changed || s.day!==day)s={day:day,status:'new',attempts:0,identityHash:a.identity.hash};
+ if(b.changed || st.identityHash!==a.identity.hash || s.day!==day)s={day:day,status:'new',attempts:0,identityHash:a.identity.hash};
  saveState(a.name,s);
  const auth=path.join(a.home,'auth.json');
  if(!fs.existsSync(auth)){log(a.name+' PENDING_LOGIN: no_login_file');return false}
