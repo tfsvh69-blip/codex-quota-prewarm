@@ -1,46 +1,61 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
- <meta charset="utf-8">
- <meta name="viewport" content="width=device-width,initial-scale=1">
- <title>Codex 账号管理台</title>
- <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f5f7fa">
+<title>Codex 额度管理台</title>
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
- <div class="wrap">
-  <header class="top">
-   <div><div class="eyebrow">CODEX · LOCAL CONTROL</div><h1>账号与额度管理</h1><p class="sub">本机多账号管理 · 额度只读检查 · 定时预激活状态</p></div>
-   <div class="topright"><span id="conn" class="status">连接中…</span><button id="refresh" class="primary">刷新全部状态</button></div>
-  </header>
-  <div class="notice"><strong>当前操作账号：</strong><span id="selected">—</span><span class="sep">·</span>切换此处不会修改 A 主账号登录文件，也不会切换已打开的 Codex 桌面应用；点击「打开终端」才会以选定账号启动独立 Codex 会话。</div>
-  <section class="overview" id="overview"><div class="ghost">正在读取账号…</div></section>
-  <section class="section-heading"><div><h2>账号列表</h2><p>五小时/每周百分比表示已使用额度，数据来自 Codex 账号接口。</p></div><small id="checked"></small></section>
-  <div id="cards" class="cards"><div class="ghost">读取中，请稍候…</div></div>
-  <section class="bottom">
-   <div class="panel">
-    <h2>账号管理</h2><p>新增后每个槽位都有独立登录目录。停用仅停止调度，不删除登录文件。</p>
-    <div class="add"><input id="new-slot" maxlength="16" placeholder="例如 D、E、F" aria-label="新槽位名称"><button id="add-btn" class="primary">新增 / 启用槽位</button></div>
-    <div id="operation" class="operation" hidden>
-     <h3 id="op-title">登录</h3>
-     <p id="op-detail"></p>
-     <a id="auth-link" class="authlink" href="#" target="_blank" rel="noopener noreferrer">打开 ChatGPT 浏览器授权页面</a>
-     <button id="cancel-login" class="quiet">取消登录</button>
-     <small>提示：浏览器若自动使用错误账号，可复制这次的授权链接到无痕窗口选择其他账号。授权网址不需要发给任何人。</small>
-    </div>
-    <div class="tip">主账号 A 不允许停用；其他槽位登录或换号后，调度器会根据新身份重新绑定状态。</div>
-   </div>
-   <div class="panel">
-    <h2>运行说明</h2><p>现役定时任务继续独立运行，本页面只管理配置并读取它们的结果。</p>
-    <div class="info"><b>05:30</b><span>晨间真实请求和失败补试</span></div>
-    <div class="info"><b>10 分钟</b><span>白天智能巡检</span></div>
-    <div class="info"><b>本地访问</b><span>127.0.0.1，未经局域网开放</span></div>
-    <div class="info"><b>判定标准</b><span>REQUEST_OK + 窗口固定重置时间</span></div>
-    <div class="tip">REQUEST_OK 代表模型调用成功；若当时仍在旧窗口中，不能说明开启了新窗口。0% 也可能是小额度请求被取整。</div>
-   </div>
-  </section>
-  <footer><span>Codex Quota Prewarm Dashboard · MVP</span><span id="server-mode"></span></footer>
+<div class="shell">
+<header class="masthead">
+ <div class="brand"><span class="brand-mark" aria-hidden="true">C<span class="mark-dot"></span></span><span class="brand-label">Codex <strong>Control</strong><small>本地账号管理</small></span></div>
+ <div class="mast-actions"><span id="conn" class="conn"><i class="indicator"></i>正在连接</span><button type="button" class="button button-primary" id="refresh"><span aria-hidden="true">⟳</span> 刷新额度</button></div>
+</header>
+<main>
+<section class="page-intro" aria-label="管理台概览">
+ <div class="intro-copy"><h1>账号总览</h1><p>一个地方查看各账号用量、重置时间与登录状态。</p></div>
+ <div class="last-updated" id="checked">正在读取数据…</div>
+</section>
+<section id="overview" class="summary" aria-label="额度摘要"><p class="placeholder">正在连接本地 Codex 服务…</p></section>
+<section class="current-strip" aria-label="当前操作账号">
+ <div class="current-icon" aria-hidden="true">◎</div>
+ <div class="current-copy"><span>当前操作账号</span><strong id="selected">—</strong><small id="current-hint">仅影响管理台和从这里新开的 Codex 终端</small></div>
+ <div class="current-tip">不改变已打开的 Codex 桌面应用或 VS Code 账号</div>
+</section>
+<section class="account-section" aria-label="账号详情">
+ <div class="section-top">
+  <div><h2>账号列表</h2><p>额度显示的是 <strong>已使用比例</strong>，并非剩余比例。</p></div>
+  <span class="section-aside">北京时间 (UTC+8)</span>
  </div>
- <div id="toast" class="toast" role="status"></div>
- <script src="/app.js" defer></script>
+ <div class="account-panel">
+  <div class="account-columns" aria-hidden="true"><span>账号 / 状态</span><span>五小时额度 · 已使用</span><span>每周额度 · 已使用</span><span>快捷操作</span></div>
+  <div id="cards" class="account-list" role="list"><p class="placeholder">正在读取账号…</p></div>
+ </div>
+</section>
+<section id="operation" class="login-panel" hidden aria-label="ChatGPT 登录授权">
+ <div class="login-panel-head"><span class="login-num">↗</span><div><h2 id="op-title">账号授权</h2><p id="op-detail">等待开始…</p></div></div>
+ <div class="login-controls"><a id="auth-link" class="button button-primary" target="_blank" rel="noopener noreferrer" href="#" hidden>打开浏览器授权</a><button id="cancel-login" type="button" class="button button-secondary">取消登录</button></div>
+ <p class="small-note">浏览器若自动选择错误账号，请在无痕窗口打开本次授权链接。不要分享授权链接。</p>
+</section>
+<div class="secondary">
+<section class="simple-panel">
+ <div class="panel-heading"><h2>账号管理</h2><span class="panel-label">ACCOUNT SLOTS</span></div>
+ <p>新增账号只创建独立槽位；登录仍使用 ChatGPT 官方授权，不复制现有凭据。</p>
+ <div class="add-form"><label class="sr-only" for="new-slot">新槽位名称</label><input id="new-slot" autocomplete="off" maxlength="16" placeholder="输入槽位，如 D、E、F"><button type="button" id="add-btn" class="button button-secondary">新增 / 启用</button></div>
+ <p class="small-note">A 为固定主账号。停用副账号不会删除登录信息。</p>
+</section>
+<section class="simple-panel">
+ <div class="panel-heading"><h2>运行机制</h2><span class="panel-label">SCHEDULER</span></div>
+ <div class="workflow"><div><b>05:30</b><span>每日晨间预激活</span></div><div><b>每 10 分钟</b><span>白天智能巡检</span></div><div><b>独立运行</b><span>上位机关闭后，计划任务仍按原配置执行</span></div></div>
+ <p class="small-note">模型请求成功不一定代表开启了新五小时窗口，具体以官方额度状态和运行日志为准。</p>
+</section>
+</div>
+</main>
+<footer><span>Codex Quota Prewarm · Local Dashboard</span><span id="server-mode">仅限 127.0.0.1</span></footer>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="/app.js" defer></script>
 </body>
 </html>

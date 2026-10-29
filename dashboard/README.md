@@ -17,6 +17,10 @@
 
 schedulerRoot 是现役 accounts.json 的文件夹路径。此私有文件已 Git 忽略。
 
+## UI 改版与设计规范
+
+采用紧凑账号列表的工程工具风格，以方便 A/B/C 横向比较为主要目标。设计原则、开源 Skill 与项目出处、可直接复用的 AI 提示词，以及交付验收清单详见 [UI_REDESIGN_GUIDE.md](../docs/UI_REDESIGN_GUIDE.md)。无新增前端框架或云依赖。
+
 ## 功能
 
 - A/B/C/D 等账号槽位：登录邮箱、登录状态、重复身份提示、五小时额度、每周额度、下一次重置时间。

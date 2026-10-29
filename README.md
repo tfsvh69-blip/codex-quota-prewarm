@@ -23,6 +23,7 @@
 - 手动启动：npm run dashboard
 - 安装登录后自动启动：powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\install-dashboard.ps1
 - 说明及限制：[dashboard/README.md](dashboard/README.md)
+- 开源 Skill、设计规范和完整提示词：[UI_REDESIGN_GUIDE.md](docs/UI_REDESIGN_GUIDE.md)
 
 上位机只监听本机回环地址，不能直接远程使用；**选择上位机当前操作账号，不会切换已经打开的 Codex 桌面应用或 VS Code 扩展**。原来的定时预激活任务保持独立运行。
 
